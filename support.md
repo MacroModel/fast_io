@@ -1,30 +1,32 @@
 ## Compiler Support
 - GCC >= 15
-- Clang >= 19
-- REMOVE MSVC SUPPORT SINCE IT SUPPORTS MODULE
+- Clang >= 20
+- MSVC
 
 ## C++ standard library support
 - GCC libstdc++
 - LLVM libc++
 - MSVC STL
 
-## Architecture Support
-- alpha
+## Mainstream Architecture Support
 - i686
 - x86_64
 - arm
 - aarch64
-- riscv
-- riscv64
-- powerpc64
 - wasm32-wasi
 - wasm64-wasi
+- loongarch64
+
+## Architecture Support
+- alpha
+- riscv (RISC-V is crap. Stop using it)
+- riscv64
+- powerpc64
 - mips-abi32
 - mips-abin32
 - mips-abi64
 - avr
 - ia64
-- loongarch64
 - xtensa-esp32
 - All other architectures should work, they just aren't tested due to time not being infinite.
 
@@ -113,7 +115,7 @@ On Windows 95 or 95 Plus! you can enable `-O3` but not `-Ofast`. You'll also nee
 - Universal CRT
 - Universal CRT with MSVC debugging
 - Wine's MSVCRT
-- Wine's UCRT 9.11+
+- Wine's UCRT 9.13+
 
 See wine bug [PR53960](https://gitlab.winehq.org/wine/wine/-/merge_requests/5752)
 
@@ -147,3 +149,4 @@ See wine bug [PR53960](https://gitlab.winehq.org/wine/wine/-/merge_requests/5752
 - LLVM Address Sanitizer
 - Full freestanding support (which means we do not have any headers besides freestanding headers. Tested with GCC's --disable-hosted-libstdcxx without any libc, including newlib)
 - Pintool support
+- ARM MTE support
