@@ -73,19 +73,35 @@ inline int sys_dup2(int old_fd, int new_fd)
 #endif
 }
 
-struct return_code
+struct posix_api_return_code
 {
-	int code{};
-	bool error{};
+	int value{};
+	int err{};
+
+	// false if there is an error, otherwise true
+	inline operator bool() const
+	{
+		return err == 0;
+	}
+
+	static inline posix_api_return_code fd(int fd)
+	{
+		return {fd, 0};
+	}
+
+	static inline posix_api_return_code error(int errnum)
+	{
+		return {-1, errnum};
+	}
 };
 
-inline return_code sys_dup2_nothrow(int old_fd, int new_fd) noexcept
+inline posix_api_return_code sys_dup2_nothrow(int old_fd, int new_fd) noexcept
 {
 #if defined(__linux__) && defined(__NR_dup2)
 	int fd{system_call<__NR_dup2, int>(old_fd, new_fd)};
 	if (linux_system_call_fails(fd))
 	{
-		return {-fd, true};
+		return posix_api_return_code::error(-fd);
 	}
 #else
 	auto fd{noexcept_call(
@@ -98,10 +114,10 @@ inline return_code sys_dup2_nothrow(int old_fd, int new_fd) noexcept
 		old_fd, new_fd)};
 	if (fd == -1)
 	{
-		return {errno, true};
+		return posix_api_return_code::error(errno);
 	}
 #endif
-	return {fd};
+	return posix_api_return_code::fd(fd);
 }
 
 inline int sys_close(int fd) noexcept

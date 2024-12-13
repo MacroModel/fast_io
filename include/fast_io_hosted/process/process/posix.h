@@ -174,16 +174,16 @@ struct io_redirector
 	}
 
 	// only used by sub process
-	inline return_code redirect_all(posix_process_io const &pio) noexcept
+	inline posix_api_return_code redirect_all(posix_process_io const &pio) noexcept
 	{
-		return_code rc;
+		posix_api_return_code rc;
 		rc = redirect(0, pio.in);
-		if (rc.error)
+		if (!rc)
 		{
 			return rc;
 		}
 		rc = redirect(1, pio.out);
-		if (rc.error)
+		if (!rc)
 		{
 			return rc;
 		}
@@ -191,20 +191,20 @@ struct io_redirector
 		return rc;
 	}
 
-	inline return_code redirect(int target_fd, posix_io_redirection const &d) noexcept
+	inline posix_api_return_code redirect(int target_fd, posix_io_redirection const &d) noexcept
 	{
 		if (!d)
 		{
 			return {};
 		}
 		bool const is_stdin{target_fd == 0};
-		return_code rc;
+		posix_api_return_code rc;
 		if (d.pipe_fds)
 		{
 			// the read/write ends of pipe are all open
 			// the user shouldn't close them if they pass entire pipe as argument
 			rc = sys_dup2_nothrow(d.pipe_fds[is_stdin ? 0 : 1], target_fd);
-			if (rc.error)
+			if (!rc)
 			{
 				return rc;
 			}
@@ -219,7 +219,7 @@ struct io_redirector
 		{
 			rc = sys_dup2_nothrow(d.fd, target_fd);
 		}
-		if (rc.error)
+		if (!rc)
 		{
 			return rc;
 		}
@@ -272,9 +272,9 @@ inline pid_t pipefork_execveat_common_impl(int dirfd, char const *cstr, char con
 		{
 			io_redirector r;
 			auto rc = r.redirect_all(pio);
-			if (rc.error)
+			if (!rc)
 			{
-				t_errno = rc.code;
+				t_errno = rc.value;
 			}
 		}
 
