@@ -14,7 +14,7 @@ https://www.ibm.com/docs/en/aix/7.1?topic=ff-lc-time-category-locale-definition-
 template <::std::integral year_type>
 inline constexpr bool is_leap_year(year_type year) noexcept
 {
-	if constexpr (my_signed_integral<year_type>)
+	if constexpr (::fast_io::details::my_signed_integral<year_type>)
 	{
 		return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
 	}
@@ -26,7 +26,7 @@ inline constexpr bool is_leap_year(year_type year) noexcept
 
 inline constexpr ::std::uint_least16_t month_accum[]{0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334};
 
-inline constexpr ::std::uint_least16_t day_of_the_year(iso8601_timestamp const &tsp) noexcept
+inline constexpr ::std::uint_least16_t day_of_the_year(::fast_io::iso8601_timestamp const &tsp) noexcept
 {
 	::std::uint_least8_t month_minus1{tsp.month};
 	--month_minus1;
@@ -34,8 +34,7 @@ inline constexpr ::std::uint_least16_t day_of_the_year(iso8601_timestamp const &
 	{
 		return 0;
 	}
-	::std::uint_least16_t value{
-		static_cast<uint_least16_t>(month_accum[month_minus1] + static_cast<uint_least16_t>(tsp.day))};
+	::std::uint_least16_t value{static_cast<::std::uint_least16_t>(month_accum[month_minus1] + static_cast<::std::uint_least16_t>(tsp.day))};
 	if (month_minus1 > 1u && is_leap_year(tsp.year))
 	{
 		++value;
@@ -71,8 +70,8 @@ inline constexpr ::std::int_least64_t day_diff(::std::int_least64_t year_after, 
 	return value;
 }
 
-inline constexpr ::std::int_least64_t day_diff(iso8601_timestamp const &tsp_after,
-											   iso8601_timestamp const &tsp_before) noexcept
+inline constexpr ::std::int_least64_t day_diff(::fast_io::iso8601_timestamp const &tsp_after,
+											   ::fast_io::iso8601_timestamp const &tsp_before) noexcept
 {
 	return ::fast_io::details::day_diff(tsp_after.year, tsp_after.month, tsp_after.day, tsp_before.year,
 										tsp_before.month, tsp_before.day);
@@ -80,7 +79,7 @@ inline constexpr ::std::int_least64_t day_diff(iso8601_timestamp const &tsp_afte
 
 template <::std::integral T, ::std::integral char_type>
 inline constexpr ::std::size_t
-lc_format_alt_digits_len(basic_io_scatter_t<basic_io_scatter_t<char_type>> const &alt_digits, T value) noexcept
+lc_format_alt_digits_len(::fast_io::basic_io_scatter_t<::fast_io::basic_io_scatter_t<char_type>> const &alt_digits, T value) noexcept
 {
 	::std::size_t size_value{static_cast<::std::size_t>(value)};
 	::std::size_t alt_digits_len{alt_digits.len};
@@ -90,21 +89,20 @@ lc_format_alt_digits_len(basic_io_scatter_t<basic_io_scatter_t<char_type>> const
 	}
 	else
 	{
-		constexpr ::std::size_t int_type_reserve_size{print_reserve_size(io_reserve_type<char_type, T>)};
+		constexpr ::std::size_t int_type_reserve_size{print_reserve_size(::fast_io::io_reserve_type<char_type, T>)};
 		return int_type_reserve_size;
 	}
 }
 
 template <::std::integral T, ::std::integral char_type>
 inline constexpr char_type *
-lc_format_alt_digits_print(basic_io_scatter_t<basic_io_scatter_t<char_type>> const &alt_digits, T value,
-						   char_type *iter) noexcept
+lc_format_alt_digits_print(::fast_io::basic_io_scatter_t<::fast_io::basic_io_scatter_t<char_type>> const &alt_digits, T value, char_type *iter) noexcept
 {
 	::std::size_t size_value{static_cast<::std::size_t>(value)};
 	::std::size_t alt_digits_len{alt_digits.len};
 	if (size_value < alt_digits_len) [[likely]]
 	{
-		return copy_scatter(alt_digits.base[size_value], iter);
+		return ::fast_io::details::copy_scatter(alt_digits.base[size_value], iter);
 	}
 	else
 	{
@@ -137,15 +135,15 @@ inline constexpr bool test_era_started(::std::int_least64_t y0, ::std::uint_leas
 }
 
 template <::std::integral char_type>
-inline constexpr basic_lc_time_era<char_type> const *
-lc_time_find_era_impl(basic_lc_time_era<char_type> const *first, basic_lc_time_era<char_type> const *last,
+inline constexpr ::fast_io::basic_lc_time_era<char_type> const *
+lc_time_find_era_impl(::fast_io::basic_lc_time_era<char_type> const *first, ::fast_io::basic_lc_time_era<char_type> const *last,
 					  ::std::int_least64_t year, lc_month_day_pass_aux month_day) noexcept
 {
 	::std::uint_least8_t month{month_day.month};
 	::std::uint_least8_t day{month_day.day};
 	for (; first != last; ++first)
 	{
-		basic_lc_time_era<char_type> const &e{*first};
+		::fast_io::basic_lc_time_era<char_type> const &e{*first};
 		bool has_era_start{};
 		bool direction{e.direction};
 		if (direction)
@@ -195,20 +193,20 @@ struct lc_time_ox_common_res
 };
 
 template <::std::integral char_type>
-inline constexpr lc_time_ox_common_res lc_time_ox_common_impl(iso8601_timestamp const &tsp, char_type ch) noexcept
+inline constexpr lc_time_ox_common_res lc_time_ox_common_impl(::fast_io::iso8601_timestamp const &tsp, char_type ch) noexcept
 {
 	switch (ch)
 	{
-	case char_literal_v<u8'd', char_type>:
-	case char_literal_v<u8'e', char_type>:
+	case ::fast_io::char_literal_v<u8'd', char_type>:
+	case ::fast_io::char_literal_v<u8'e', char_type>:
 	{
 		return {tsp.day};
 	}
-	case char_literal_v<u8'H', char_type>:
+	case ::fast_io::char_literal_v<u8'H', char_type>:
 	{
 		return {tsp.hours};
 	}
-	case char_literal_v<u8'I', char_type>:
+	case ::fast_io::char_literal_v<u8'I', char_type>:
 	{
 		::std::uint_least8_t hours{tsp.hours};
 		constexpr ::std::uint_least8_t twlv{static_cast<::std::uint_least8_t>(12u)};
@@ -222,33 +220,33 @@ inline constexpr lc_time_ox_common_res lc_time_ox_common_impl(iso8601_timestamp 
 		}
 		return {hours};
 	}
-	case char_literal_v<u8'm', char_type>:
+	case ::fast_io::char_literal_v<u8'm', char_type>:
 	{
 		return {tsp.month};
 	}
-	case char_literal_v<u8'M', char_type>:
+	case ::fast_io::char_literal_v<u8'M', char_type>:
 	{
 		return {tsp.minutes};
 	}
-	case char_literal_v<u8'S', char_type>:
+	case ::fast_io::char_literal_v<u8'S', char_type>:
 	{
 		return {tsp.seconds};
 	}
-	case char_literal_v<u8'u', char_type>:
+	case ::fast_io::char_literal_v<u8'u', char_type>:
 	{
 		return {weekday(tsp)};
 	}
-	case char_literal_v<u8'U', char_type>:
+	case ::fast_io::char_literal_v<u8'U', char_type>:
 	{
 		return {static_cast<::std::uint_least8_t>(
 			static_cast<::std::uint_least16_t>(weekday(tsp.year, 1, 1) + day_of_the_year(tsp) - 1u) / 7u)};
 	}
-	case char_literal_v<u8'w', char_type>:
-	case char_literal_v<u8'o', char_type>:
+	case ::fast_io::char_literal_v<u8'w', char_type>:
+	case ::fast_io::char_literal_v<u8'o', char_type>:
 	{
 		return {c_weekday(tsp)};
 	}
-	case char_literal_v<u8'y', char_type>:
+	case ::fast_io::char_literal_v<u8'y', char_type>:
 	{
 		::std::uint_least64_t year{static_cast<::std::uint_least64_t>(tsp.year)};
 		if (tsp.year < 0)
@@ -278,16 +276,16 @@ inline constexpr char_type *non_overlapped_copy_to_lowercase(char_type const *__
 }
 
 template <::std::integral char_type>
-inline constexpr char_type *copy_scatter_to_lowercase(basic_io_scatter_t<char_type> const &scatter,
+inline constexpr char_type *copy_scatter_to_lowercase(::fast_io::basic_io_scatter_t<char_type> const &scatter,
 													  char_type *iter) noexcept
 {
-	return non_overlapped_copy_to_lowercase(scatter.base, scatter.base + scatter.len, iter);
+	return ::fast_io::non_overlapped_copy_to_lowercase(scatter.base, scatter.base + scatter.len, iter);
 }
 
 template <::std::integral char_type>
 inline constexpr ::std::size_t
-lc_print_reserve_size_time_format_common_impl(basic_lc_time<char_type> const &t, iso8601_timestamp const &tsp,
-											  basic_io_scatter_t<char_type> const &format_str) noexcept
+lc_print_reserve_size_time_format_common_impl(::fast_io::basic_lc_time<char_type> const &t, ::fast_io::iso8601_timestamp const &tsp,
+											  ::fast_io::basic_io_scatter_t<char_type> const &format_str) noexcept
 {
 	constexpr ::std::size_t uint_least8_reserve_size{
 		print_reserve_size(io_reserve_type<char_type, ::std::uint_least8_t>)};

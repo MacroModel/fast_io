@@ -36,7 +36,7 @@ inline constexpr auto status_io_print_forward(::fast_io::io_alias_type_t<to_char
 } // namespace manipulators
 
 template <typename char_type, typename T>
-concept transcode_imaginary_printable = ::std::integral<char_type> && requires() {
+concept transcode_imaginary_printable = ::std::integral<char_type> && requires {
 	typename T::char_type;
 	typename T::transcoder_value_type;
 	requires(::std::same_as<T, ::fast_io::manipulators::basic_transcoder_t<typename T::char_type, typename T::transcoder_value_type>> &&

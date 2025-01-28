@@ -10,6 +10,7 @@
 
 #include "fast_io_dsal/impl/misc/push_warnings.h"
 
+#include "fast_io_i18n/MIB_enum.h"
 #include "fast_io_i18n/lc.h"
 #include "fast_io_i18n/lc_print.h"
 #if ((__STDC_HOSTED__ == 1 && (!defined(_GLIBCXX_HOSTED) || _GLIBCXX_HOSTED == 1) && \

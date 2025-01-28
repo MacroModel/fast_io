@@ -3,7 +3,7 @@
 namespace fast_io::details
 {
 // let the compiler pick the best calling convention.
-template <::std::integral char_type, my_unsigned_integral U>
+template <::std::integral char_type, ::fast_io::details::my_unsigned_integral U>
 inline constexpr char_type *lc_print_rsv_fp_dgs_common_decay_impl(char_type const *decimal_point_base,
 																  ::std::size_t decimal_point_len, char_type *iter,
 																  U m10, ::std::uint_least32_t m10len) noexcept
@@ -18,22 +18,22 @@ inline constexpr char_type *lc_print_rsv_fp_dgs_common_decay_impl(char_type cons
 	}
 	else
 	{
-		iter = non_overlapped_copy_n(decimal_point_base, decimal_point_len, iter);
+		iter = ::fast_io::details::non_overlapped_copy_n(decimal_point_base, decimal_point_len, iter);
 	}
 	return res;
 }
 
-template <::std::integral char_type, my_unsigned_integral U>
-inline constexpr char_type *lc_print_rsv_fp_dgs_common_impl(basic_io_scatter_t<char_type> const &decimal_point_ref,
+template <::std::integral char_type, ::fast_io::details::my_unsigned_integral U>
+inline constexpr char_type *lc_print_rsv_fp_dgs_common_impl(::fast_io::basic_io_scatter_t<char_type> const &decimal_point_ref,
 															char_type *iter, U m10,
 															::std::uint_least32_t m10len) noexcept
 {
-	basic_io_scatter_t<char_type> decimal_point{decimal_point_ref};
+	::fast_io::basic_io_scatter_t<char_type> decimal_point{decimal_point_ref};
 	return lc_print_rsv_fp_dgs_common_decay_impl(decimal_point.base, decimal_point.len, iter, m10, m10len);
 }
 
-template <::std::integral char_type, my_unsigned_integral U>
-inline constexpr char_type *lc_print_rsv_fp_decimal_common_impl(basic_io_scatter_t<char_type> const &decimal_point_ref,
+template <::std::integral char_type, ::fast_io::details::my_unsigned_integral U>
+inline constexpr char_type *lc_print_rsv_fp_decimal_common_impl(::fast_io::basic_io_scatter_t<char_type> const &decimal_point_ref,
 																char_type *iter, U m10,
 																::std::uint_least32_t m10len) noexcept
 {
@@ -55,26 +55,25 @@ struct lc_fixed_carrier
 };
 
 template <typename flt, ::std::integral char_type>
-inline constexpr char_type *
-lc_no_grouping_fixed_case1_integer_and_point(char_type *iter, typename iec559_traits<flt>::mantissa_type m10,
-											 lc_fixed_carrier carrier,
-											 basic_io_scatter_t<char_type> const &decimal_point) noexcept
+inline constexpr char_type *lc_no_grouping_fixed_case1_integer_and_point(
+	char_type *iter, typename ::fast_io::details::iec559_traits<flt>::mantissa_type m10,
+	lc_fixed_carrier carrier,
+	::fast_io::basic_io_scatter_t<char_type> const &decimal_point) noexcept
 {
 	::std::int_least32_t olength{carrier.olength};
 	::std::int_least32_t real_exp{carrier.real_exp};
 	auto eposition(real_exp + 1);
 	if (olength == eposition)
 	{
-		print_reserve_integral_main_impl<10, false, true>(iter += olength, m10,
-														  static_cast<::std::uint_least32_t>(olength));
+		print_reserve_integral_main_impl<10, false, true>(iter += olength, m10, static_cast<::std::uint_least32_t>(olength));
 	}
 	else
 	{
 		auto tmp{iter};
 		auto decimal_point_base{decimal_point.base};
 		::std::size_t const decimal_point_len{decimal_point.len};
-		print_reserve_integral_main_impl<10, false, true>(iter += olength + decimal_point_len, m10,
-														  static_cast<::std::uint_least32_t>(olength));
+		print_reserve_integral_main_impl<10, false, true>(iter += olength + decimal_point_len,
+														  m10, static_cast<::std::uint_least32_t>(olength));
 		my_copy_n(tmp + decimal_point_len, static_cast<::std::uint_least32_t>(eposition), tmp);
 		if (decimal_point_len == 1u) [[likely]]
 		{
@@ -82,18 +81,18 @@ lc_no_grouping_fixed_case1_integer_and_point(char_type *iter, typename iec559_tr
 		}
 		else
 		{
-			non_overlapped_copy_n(decimal_point_base, decimal_point_len, tmp + eposition);
+			::fast_io::details::non_overlapped_copy_n(decimal_point_base, decimal_point_len, tmp + eposition);
 		}
 	}
 	return iter;
 }
 
 template <typename flt, ::std::integral char_type>
-inline constexpr char_type *
-lc_grouping_fixed_case2_all_point(char_type *iter, typename iec559_traits<flt>::mantissa_type m10,
-								  lc_fixed_carrier carrier, basic_io_scatter_t<char_type> const &decimal_point) noexcept
+inline constexpr char_type *lc_grouping_fixed_case2_all_point(
+	char_type *iter, typename iec559_traits<flt>::mantissa_type m10,
+	lc_fixed_carrier carrier, ::fast_io::basic_io_scatter_t<char_type> const &decimal_point) noexcept
 {
-	*iter = char_literal_v<u8'0', char_type>;
+	*iter = ::fast_io::char_literal_v<u8'0', char_type>;
 	++iter;
 	auto decimal_point_base{decimal_point.base};
 	::std::size_t const decimal_point_len{decimal_point.len};
@@ -104,13 +103,13 @@ lc_grouping_fixed_case2_all_point(char_type *iter, typename iec559_traits<flt>::
 	}
 	else
 	{
-		iter = non_overlapped_copy_n(decimal_point_base, decimal_point_len, iter);
+		iter = ::fast_io::details::non_overlapped_copy_n(decimal_point_base, decimal_point_len, iter);
 	}
 	::std::int_least32_t olength{carrier.olength};
 	::std::int_least32_t real_exp{carrier.real_exp};
-	iter = fill_zeros_impl(iter, static_cast<::std::uint_least32_t>(-real_exp - 1));
-	print_reserve_integral_main_impl<10, false, true>(iter += olength, m10,
-													  static_cast<::std::uint_least32_t>(olength));
+	iter = ::fast_io::details::fill_zeros_impl(iter, static_cast<::std::uint_least32_t>(-real_exp - 1));
+	print_reserve_integral_main_impl<10, false, true>(iter += olength,
+													  m10, static_cast<::std::uint_least32_t>(olength));
 	return iter;
 }
 
@@ -166,24 +165,21 @@ constexpr char_type *lc_grouping_single_sep_ch_impl(::std::size_t const *groupin
 	return out_reverse;
 }
 
-template <::std::random_access_iterator srcIter, ::std::random_access_iterator destIter>
-inline constexpr destIter
-grouping_handle_buffer_internal(srcIter first, srcIter last, destIter dest, ::std::size_t const *grouping_base,
-								::std::size_t grouping_len, ::std::iter_value_t<destIter> const *thousands_sep_base,
-								::std::size_t thousands_sep_len, ::std::iter_value_t<destIter> *buffer_end) noexcept
+template <::std::integral char_type>
+inline constexpr char_type *grouping_handle_buffer_internal(char_type const *first, char_type const *last, char_type *dest, ::std::size_t const *grouping_base,
+															::std::size_t grouping_len, char_type const *thousands_sep_base,
+															::std::size_t thousands_sep_len, char_type *buffer_end) noexcept
 {
-	using char_type = ::std::iter_value_t<srcIter>;
-	char_type seperator_ch{char_literal_v<u8',', char_type>};
+	char_type seperator_ch{::fast_io::char_literal_v<u8',', char_type>};
 	bool sep_single_character{thousands_sep_len == 1};
 	if (sep_single_character)
 	{
 		seperator_ch = *thousands_sep_base;
 	}
-	auto buffer_start{
-		lc_grouping_single_sep_ch_impl(grouping_base, grouping_len, first, last, buffer_end, seperator_ch)};
+	auto buffer_start{lc_grouping_single_sep_ch_impl(grouping_base, grouping_len, first, last, buffer_end, seperator_ch)};
 	if (sep_single_character)
 	{
-		return non_overlapped_copy(buffer_start, buffer_end, dest);
+		return ::fast_io::details::non_overlapped_copy(buffer_start, buffer_end, dest);
 	}
 	else
 	{
@@ -191,30 +187,27 @@ grouping_handle_buffer_internal(srcIter first, srcIter last, destIter dest, ::st
 	}
 }
 
-template <::std::size_t digits, ::std::random_access_iterator srcIter, ::std::random_access_iterator destIter>
+template <::std::size_t digits, ::std::integral char_type>
 	requires(digits < (SIZE_MAX >> 1u))
-inline constexpr destIter grouping_handle_buffer(srcIter first, srcIter last, destIter dest,
-												 ::std::size_t const *grouping_base, ::std::size_t grouping_len,
-												 ::std::iter_value_t<destIter> const *thousands_sep_base,
-												 ::std::size_t thousands_sep_len) noexcept
+inline constexpr char_type *grouping_handle_buffer(char_type const *first, char_type const *last, char_type *dest,
+												   ::std::size_t const *grouping_base, ::std::size_t grouping_len,
+												   char_type const *thousands_sep_base,
+												   ::std::size_t thousands_sep_len) noexcept
 {
-	using char_type = ::std::iter_value_t<srcIter>;
 	constexpr ::std::size_t allocated_buffer_size{digits << 1u};
 	char_type buffer[allocated_buffer_size];
 	return grouping_handle_buffer_internal(first, last, dest, grouping_base, grouping_len, thousands_sep_base,
 										   thousands_sep_len, buffer + allocated_buffer_size);
 }
 
-template <typename flt, ::std::random_access_iterator Iter>
-inline constexpr Iter lc_grouping_fixed_case1_integer_and_point(
-	Iter iter, typename iec559_traits<flt>::mantissa_type m10, lc_fixed_carrier carrier,
-	basic_io_scatter_t<::std::iter_value_t<Iter>> const &decimal_point, ::std::size_t const *grouping_base,
-	::std::size_t grouping_len, ::std::iter_value_t<Iter> const *thousands_sep_base,
-	::std::size_t thousands_sep_len) noexcept
+template <typename flt, ::std::integral char_type>
+inline constexpr char_type *lc_grouping_fixed_case1_integer_and_point(
+	char_type *iter, typename ::fast_io::details::iec559_traits<flt>::mantissa_type m10, lc_fixed_carrier carrier,
+	::fast_io::basic_io_scatter_t<char_type> const &decimal_point, ::std::size_t const *grouping_base,
+	::std::size_t grouping_len, char_type const *thousands_sep_base, ::std::size_t thousands_sep_len) noexcept
 {
-	using trait = iec559_traits<flt>;
+	using trait = ::fast_io::details::iec559_traits<flt>;
 	constexpr ::std::size_t m10total_digits{trait::m10digits + trait::e10digits + 2};
-	using char_type = ::std::iter_value_t<Iter>;
 	::std::int_least32_t olength{carrier.olength};
 	::std::int_least32_t real_exp{carrier.real_exp};
 	auto eposition(real_exp + 1);
@@ -222,8 +215,7 @@ inline constexpr Iter lc_grouping_fixed_case1_integer_and_point(
 	{
 		char_type buffer1[m10total_digits];
 		auto buffer1_end{buffer1 + olength};
-		print_reserve_integral_main_impl<10, false, true>(buffer1_end, m10,
-														  static_cast<::std::uint_least32_t>(olength));
+		print_reserve_integral_main_impl<10, false, true>(buffer1_end, m10, static_cast<::std::uint_least32_t>(olength));
 		return grouping_handle_buffer<m10total_digits>(buffer1, buffer1_end, iter, grouping_base, grouping_len,
 													   thousands_sep_base, thousands_sep_len);
 	}
@@ -231,8 +223,7 @@ inline constexpr Iter lc_grouping_fixed_case1_integer_and_point(
 	{
 		char_type buffer1[m10total_digits];
 		auto buffer1_end{buffer1 + olength};
-		print_reserve_integral_main_impl<10, false, true>(buffer1_end, m10,
-														  static_cast<::std::uint_least32_t>(olength));
+		print_reserve_integral_main_impl<10, false, true>(buffer1_end, m10, static_cast<::std::uint_least32_t>(olength));
 		iter = grouping_handle_buffer<m10total_digits>(buffer1, buffer1 + eposition, iter, grouping_base, grouping_len,
 													   thousands_sep_base, thousands_sep_len);
 		auto decimal_point_base{decimal_point.base};
@@ -244,29 +235,29 @@ inline constexpr Iter lc_grouping_fixed_case1_integer_and_point(
 		}
 		else
 		{
-			iter = non_overlapped_copy_n(decimal_point_base, decimal_point_len, iter);
+			iter = ::fast_io::details::non_overlapped_copy_n(decimal_point_base, decimal_point_len, iter);
 		}
-		iter = non_overlapped_copy(buffer1 + eposition, buffer1_end, iter);
+		iter = ::fast_io::details::non_overlapped_copy(buffer1 + eposition, buffer1_end, iter);
 	}
 	return iter;
 }
 
 template <typename flt, ::std::integral char_type>
-inline constexpr char_type *lc_print_rsv_fp_fixed_decision_impl(basic_lc_all<char_type> const *all, char_type *iter,
-																typename iec559_traits<flt>::mantissa_type m10,
+inline constexpr char_type *lc_print_rsv_fp_fixed_decision_impl(::fast_io::basic_lc_object<char_type> const *lc, char_type *iter,
+																typename ::fast_io::details::iec559_traits<flt>::mantissa_type m10,
 																::std::int_least32_t e10) noexcept
 {
-	auto const &numeric_ref{all->numeric};
+	auto const &numeric_ref{lc->all.numeric};
 	auto thousands_sep{numeric_ref.thousands_sep};
-	auto thousands_sep_base{thousands_sep.base};
+	auto thousands_sep_base{lc->data_storage.get(thousands_sep)};
 	auto thousands_sep_len{thousands_sep.len};
 	auto grouping{numeric_ref.grouping};
-	auto grouping_base{grouping.base};
+	auto grouping_base{lc->data_storage.get(grouping)};
 	auto grouping_len{grouping.len};
-	::std::int_least32_t olength(static_cast<::std::int_least32_t>(chars_len<10, true>(m10)));
+	auto decimal_point{lc->data_storage.to_io_scatter(numeric_ref.decimal_point)};
+	::std::int_least32_t olength(static_cast<::std::int_least32_t>(::fast_io::details::chars_len<10, true>(m10)));
 	::std::int_least32_t const real_exp(static_cast<::std::int_least32_t>(e10 + olength - 1));
-	bool no_grouping_grouping_case{
-		((grouping_len == 0u) || (thousands_sep_len == 0u))}; // no grouping. for case like "C" or "POSIX"
+	bool no_grouping_grouping_case{((grouping_len == 0u) || (thousands_sep_len == 0u))}; // no grouping. for case like "C" or "POSIX"
 	if (olength <= real_exp)
 	{
 		if (no_grouping_grouping_case)
@@ -275,7 +266,7 @@ inline constexpr char_type *lc_print_rsv_fp_fixed_decision_impl(basic_lc_all<cha
 		}
 		else
 		{
-			using trait = iec559_traits<flt>;
+			using trait = ::fast_io::details::iec559_traits<flt>;
 			constexpr ::std::size_t m10total_digits{trait::m10digits + trait::e10max + 2};
 			char_type buffer1[m10total_digits];
 			auto buffer1_end{fixed_case0_full_integer<flt>(buffer1, m10, olength, real_exp)};
@@ -287,35 +278,33 @@ inline constexpr char_type *lc_print_rsv_fp_fixed_decision_impl(basic_lc_all<cha
 	{
 		if (no_grouping_grouping_case)
 		{
-			return lc_no_grouping_fixed_case1_integer_and_point<flt>(iter, m10, {olength, real_exp},
-																	 numeric_ref.decimal_point);
+			return lc_no_grouping_fixed_case1_integer_and_point<flt>(iter, m10, {olength, real_exp}, decimal_point);
 		}
 		else
 		{
-			return lc_grouping_fixed_case1_integer_and_point<flt>(iter, m10, {olength, real_exp},
-																  numeric_ref.decimal_point, grouping_base,
+			return lc_grouping_fixed_case1_integer_and_point<flt>(iter, m10, {olength, real_exp}, decimal_point, grouping_base,
 																  grouping_len, thousands_sep_base, thousands_sep_len);
 		}
 	}
 	else
 	{
-		return lc_grouping_fixed_case2_all_point<flt>(iter, m10, {olength, real_exp}, numeric_ref.decimal_point);
+		return lc_grouping_fixed_case2_all_point<flt>(iter, m10, {olength, real_exp}, decimal_point);
 	}
 }
 
 template <typename flt, bool uppercase_e, ::fast_io::manipulators::floating_format mt, ::std::integral char_type>
-inline constexpr char_type *lc_print_rsv_fp_decision_impl(basic_lc_all<char_type> const *all, char_type *iter,
-														  typename iec559_traits<flt>::mantissa_type m10,
+inline constexpr char_type *lc_print_rsv_fp_decision_impl(::fast_io::basic_lc_object<char_type> const *lc, char_type *iter,
+														  typename ::fast_io::details::iec559_traits<flt>::mantissa_type m10,
 														  ::std::int_least32_t e10) noexcept
 {
 	if constexpr (mt == ::fast_io::manipulators::floating_format::general)
 	{
 		if (-5 < e10 && e10 < 7)
 		{
-			return lc_print_rsv_fp_fixed_decision_impl<flt>(all, iter, m10, e10);
+			return lc_print_rsv_fp_fixed_decision_impl<flt>(lc, iter, m10, e10);
 		}
 		return lc_print_rsv_fp_decision_impl<flt, uppercase_e, ::fast_io::manipulators::floating_format::scientific>(
-			all, iter, m10, e10);
+			lc, iter, m10, e10);
 	}
 	else if constexpr (mt == ::fast_io::manipulators::floating_format::scientific)
 	{
@@ -329,7 +318,7 @@ inline constexpr char_type *lc_print_rsv_fp_decision_impl(basic_lc_all<char_type
 			::std::uint_least32_t olength{static_cast<::std::uint_least32_t>(chars_len<10, true>(m10))};
 			::std::uint_least32_t sz{static_cast<::std::uint_least32_t>(olength - 1u)};
 			e10 += static_cast<::std::int_least32_t>(sz);
-			iter = lc_print_rsv_fp_dgs_common_impl(all->numeric.decimal_point, iter, m10, olength);
+			iter = lc_print_rsv_fp_dgs_common_impl(lc->data_storage.to_io_scatter(lc->all.numeric.decimal_point), iter, m10, olength);
 		}
 		return print_rsv_fp_e_impl<flt, uppercase_e>(iter, e10);
 	}
@@ -359,11 +348,12 @@ inline constexpr char_type *lc_print_rsv_fp_decision_impl(basic_lc_all<char_type
 		}
 		::std::uint_least32_t scientific_length{
 			static_cast<::std::uint_least32_t>(olength == 1 ? olength + 3 : olength + 5)};
-		auto const &numeric_ref{all->numeric};
+		auto const &numeric_ref{lc->all.numeric};
+		auto decimal_point{lc->data_storage.to_io_scatter(numeric_ref.decimal_point)};
 		if (scientific_length < fixed_length)
 		{
 			// scientific decision
-			iter = lc_print_rsv_fp_decimal_common_impl(numeric_ref.decimal_point, iter, m10,
+			iter = lc_print_rsv_fp_decimal_common_impl(decimal_point, iter, m10,
 													   static_cast<::std::uint_least32_t>(olength));
 			return print_rsv_fp_e_impl<flt, uppercase_e>(iter, real_exp);
 		}
@@ -398,20 +388,18 @@ inline constexpr char_type *lc_print_rsv_fp_decision_impl(basic_lc_all<char_type
 		{
 			if (no_grouping_grouping_case)
 			{
-				return lc_no_grouping_fixed_case1_integer_and_point<flt>(iter, m10, {olength, real_exp},
-																		 numeric_ref.decimal_point);
+				return lc_no_grouping_fixed_case1_integer_and_point<flt>(iter, m10, {olength, real_exp}, decimal_point);
 			}
 			else
 			{
 				return lc_grouping_fixed_case1_integer_and_point<flt>(
-					iter, m10, {olength, real_exp}, numeric_ref.decimal_point, grouping_base, grouping_len,
+					iter, m10, {olength, real_exp}, decimal_point, grouping_base, grouping_len,
 					thousands_sep_base, thousands_sep_len);
 			}
 		}
 		default:
 		{
-			return lc_grouping_fixed_case2_all_point<flt>(iter, m10, {olength, real_exp},
-														  numeric_ref.decimal_point);
+			return lc_grouping_fixed_case2_all_point<flt>(iter, m10, {olength, real_exp}, decimal_point);
 		}
 		}
 	}
@@ -419,16 +407,15 @@ inline constexpr char_type *lc_print_rsv_fp_decision_impl(basic_lc_all<char_type
 
 template <bool showpos, bool uppercase, bool uppercase_e, ::fast_io::manipulators::floating_format mt, typename flt,
 		  ::std::integral char_type>
-inline constexpr char_type *lc_print_rsvflt_define_impl(basic_lc_all<char_type> const *all, char_type *iter,
-														flt f) noexcept
+inline constexpr char_type *lc_print_rsvflt_define_impl(::fast_io::basic_lc_object<char_type> const *lc, char_type *iter, flt f) noexcept
 {
 	if constexpr (::fast_io::manipulators::floating_format::fixed == mt && uppercase_e)
 	{
-		return lc_print_rsvflt_define_impl<showpos, uppercase, false, mt>(all, iter, f);
+		return lc_print_rsvflt_define_impl<showpos, uppercase, false, mt>(lc, iter, f);
 	}
 	else
 	{
-		using trait = iec559_traits<flt>;
+		using trait = ::fast_io::details::iec559_traits<flt>;
 		using mantissa_type = typename trait::mantissa_type;
 		constexpr ::std::size_t ebits{trait::ebits};
 		constexpr mantissa_type exponent_mask{(static_cast<mantissa_type>(1) << ebits) - 1};
@@ -443,7 +430,7 @@ inline constexpr char_type *lc_print_rsvflt_define_impl(basic_lc_all<char_type> 
 		{
 			if constexpr (mt != ::fast_io::manipulators::floating_format::scientific)
 			{
-				*iter = char_literal_v<u8'0', char_type>;
+				*iter = ::fast_io::char_literal_v<u8'0', char_type>;
 				++iter;
 				return iter;
 			}
@@ -455,11 +442,11 @@ inline constexpr char_type *lc_print_rsvflt_define_impl(basic_lc_all<char_type> 
 		auto [m10, e10] = dragonbox_impl<flt>(mantissa, static_cast<::std::int_least32_t>(exponent));
 		if constexpr (mt == ::fast_io::manipulators::floating_format::fixed)
 		{
-			return lc_print_rsv_fp_fixed_decision_impl<flt>(all, iter, m10, e10);
+			return lc_print_rsv_fp_fixed_decision_impl<flt>(lc, iter, m10, e10);
 		}
 		else
 		{
-			return lc_print_rsv_fp_decision_impl<flt, uppercase_e, mt>(all, iter, m10, e10);
+			return lc_print_rsv_fp_decision_impl<flt, uppercase_e, mt>(lc, iter, m10, e10);
 		}
 	}
 }
