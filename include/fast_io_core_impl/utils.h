@@ -275,7 +275,7 @@ inline constexpr U byte_swap(U a) noexcept
 #if __cpp_lib_is_constant_evaluated >= 201811L
 		if (__builtin_is_constant_evaluated())
 		{
-			return details::byte_swap_naive_impl(a);
+			return ::fast_io::details::byte_swap_naive_impl(a);
 		}
 		else
 #endif
@@ -369,7 +369,7 @@ inline
 			{
 				::fast_io::freestanding::array<::std::byte, sizeof(range_type)> arr{
 					::std::bit_cast<::fast_io::freestanding::array<::std::byte, sizeof(range_type)>>(*i)};
-				j = non_overlapped_copy_n(arr.data(), arr.size(), j);
+				j = ::fast_io::details::non_overlapped_copy_n(arr.data(), arr.size(), j);
 			}
 		}
 	}
@@ -444,15 +444,14 @@ template <::std::integral char_type, ::std::size_t n, ::std::random_access_itera
 	requires(n != 0)
 inline constexpr output_iter copy_string_literal(char_type const (&s)[n], output_iter result)
 {
-	details::non_overlapped_copy_n(s, n - 1, result);
+	::fast_io::details::non_overlapped_copy_n(s, n - 1, result);
 	return result + (n - 1);
 }
 
 template <::std::input_or_output_iterator output_iter>
-inline constexpr output_iter copy_scatter(basic_io_scatter_t<::std::iter_value_t<output_iter>> scatter,
-										  output_iter result)
+inline constexpr output_iter copy_scatter(basic_io_scatter_t<::std::iter_value_t<output_iter>> scatter, output_iter result)
 {
-	return details::non_overlapped_copy_n(scatter.base, scatter.len, result);
+	return ::fast_io::details::non_overlapped_copy_n(scatter.base, scatter.len, result);
 }
 
 template <my_integral T>

@@ -703,6 +703,11 @@ inline constexpr void lc_print_control_buffer_impl(::fast_io::basic_lc_object<ty
 		}
 	}
 }
+template <bool line, typename output, typename... Args>
+inline constexpr void lc_print_control_buffer_all_args_impl(::fast_io::basic_lc_object<typename output::output_char_type> const *lc, output outstm, Args... args)
+{
+	return ::fast_io::details::decay::lc_print_control_buffer_impl<line, 0, sizeof...(Args)>(lc, outstm, args...);
+}
 
 } // namespace details::decay
 
@@ -732,7 +737,7 @@ inline constexpr void lc_status_print_define_decay(::fast_io::basic_lc_object<ty
 	}
 	else if constexpr (::fast_io::operations::decay::defines::has_obuffer_basic_operations<output>)
 	{
-		// return ::fast_io::details::decay::lc_print_control_buffer_all_args_impl<line>(lc, outstm, args...);
+		return ::fast_io::details::decay::lc_print_control_buffer_all_args_impl<line>(lc, outstm, args...);
 	}
 	else
 	{

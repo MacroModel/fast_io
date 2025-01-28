@@ -8,13 +8,11 @@ Credit: Jk jeon
 namespace fast_io::details
 {
 
-template <bool showbase, bool showbase_uppercase, bool showpos, bool uppercase, bool uppercase_e, typename flt,
-		  ::std::integral char_type>
-inline constexpr char_type *lc_print_rsvhexfloat_define_impl(char_type *iter, flt f,
-															 char_type const *decimal_point_base,
+template <bool showbase, bool showbase_uppercase, bool showpos, bool uppercase, bool uppercase_e, typename flt, ::std::integral char_type>
+inline constexpr char_type *lc_print_rsvhexfloat_define_impl(char_type *iter, flt f, char_type const *decimal_point_base,
 															 ::std::size_t decimal_point_len) noexcept
 {
-	using trait = iec559_traits<flt>;
+	using trait = ::fast_io::details::iec559_traits<flt>;
 	using mantissa_type = typename trait::mantissa_type;
 	constexpr ::std::size_t mbits{trait::mbits};
 	constexpr ::std::size_t ebits{trait::ebits};
@@ -52,11 +50,11 @@ inline constexpr char_type *lc_print_rsvhexfloat_define_impl(char_type *iter, fl
 		if (exponent == 0)
 		{
 			++e2;
-			*iter = char_literal_v<u8'0', char_type>;
+			*iter = ::fast_io::char_literal_v<u8'0', char_type>;
 		}
 		else
 		{
-			*iter = char_literal_v<u8'1', char_type>;
+			*iter = ::fast_io::char_literal_v<u8'1', char_type>;
 		}
 		++iter;
 		if (decimal_point_len == 1) [[likely]]
@@ -72,10 +70,10 @@ inline constexpr char_type *lc_print_rsvhexfloat_define_impl(char_type *iter, fl
 	}
 	else
 	{
-		*iter = char_literal_v<u8'1', char_type>;
+		*iter = ::fast_io::char_literal_v<u8'1', char_type>;
 		++iter;
 	}
-	*iter = char_literal_v < uppercase_e ? u8'P' : u8'p', char_type > ;
+	*iter = ::fast_io::char_literal_v<(uppercase_e ? u8'P' : u8'p'), char_type>;
 	++iter;
 	return with_sign_prt_rsv_exponent_hex_impl<trait::e2hexdigits>(iter, e2);
 }

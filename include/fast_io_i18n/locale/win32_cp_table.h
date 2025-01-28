@@ -1,0 +1,190 @@
+switch (acp)
+{
+	using enum ::fast_io::MIB_enum;
+case 37:
+	return IBM037;
+case 437:
+	return PC8CodePage437;
+case 500:
+	return IBM500;
+case 708:
+	return ISOLatinArabic;
+case 775:
+	return PC775Baltic;
+case 850:
+	return PC850Multilingual;
+case 852:
+	return PCp852;
+case 855:
+	return IBM855;
+case 857:
+	return IBM857;
+case 858:
+	return IBM00858;
+case 860:
+	return IBM860;
+case 861:
+	return IBM861;
+case 862:
+	return PC862LatinHebrew;
+case 863:
+	return IBM863;
+case 864:
+	return IBM864;
+case 865:
+	return IBM865;
+case 866:
+	return IBM866;
+case 869:
+	return IBM869;
+case 870:
+	return IBM870;
+case 874:
+	return windows874;
+case 932:
+	return ShiftJIS;
+case 936:
+	return GB2312;
+case 949:
+	return KSC56011987;
+case 950:
+	return Big5;
+case 1026:
+	return IBM1026;
+case 1047:
+	return IBM1047;
+case 1140:
+	return IBM01140;
+case 1141:
+	return IBM01141;
+case 1142:
+	return IBM01142;
+case 1143:
+	return IBM01143;
+case 1144:
+	return IBM01144;
+case 1145:
+	return IBM01145;
+case 1146:
+	return IBM01146;
+case 1147:
+	return IBM01147;
+case 1148:
+	return IBM01148;
+case 1149:
+	return IBM01149;
+case 1200:
+	return UTF16;
+case 1201:
+	return UTF16BE;
+case 1250:
+	return windows1250;
+case 1251:
+	return windows1251;
+case 1252:
+	return windows1252;
+case 1253:
+	return windows1253;
+case 1254:
+	return windows1254;
+case 1255:
+	return windows1255;
+case 1256:
+	return windows1256;
+case 1257:
+	return windows1257;
+case 1258:
+	return windows1258;
+case 10000:
+	return Macintosh;
+case 12000:
+	return UTF32;
+case 12001:
+	return UTF32BE;
+case 20127:
+	return ASCII;
+case 20273:
+	return IBM273;
+case 20277:
+	return IBM277;
+case 20278:
+	return IBM278;
+case 20280:
+	return IBM280;
+case 20284:
+	return IBM284;
+case 20285:
+	return IBM285;
+case 20290:
+	return IBM290;
+case 20297:
+	return IBM297;
+case 20420:
+	return IBM420;
+case 20423:
+	return IBM423;
+case 20424:
+	return IBM424;
+case 20838:
+	return IBMThai;
+case 20866:
+	return KOI8R;
+case 20871:
+	return IBM871;
+case 20880:
+	return IBM880;
+case 20905:
+	return IBM905;
+case 20924:
+	return IBM00924;
+case 20932:
+	return EUCPkdFmtJapanese;
+case 21866:
+	return KOI8U;
+case 28591:
+	return ISOLatin1;
+case 28592:
+	return ISOLatin2;
+case 28593:
+	return ISOLatin3;
+case 28594:
+	return ISOLatin4;
+case 28595:
+	return ISOLatinCyrillic;
+case 28596:
+	return ISOLatinArabic;
+case 28597:
+	return ISOLatinGreek;
+case 28598:
+	return ISOLatinHebrew;
+case 28599:
+	return ISOLatin5;
+case 28603:
+	return ISO885913;
+case 28605:
+	return ISO885915;
+case 38598:
+	return ISO88598I;
+case 50220:
+	return ISO2022JP;
+case 50221:
+	return ISO2022JP2;
+case 50222:
+	return ISO2022JP2;
+case 50225:
+	return ISO2022KR;
+case 51932:
+	return EUCPkdFmtJapanese;
+case 51949:
+	return EUCKR;
+case 52936:
+	return HZGB2312;
+case 54936:
+	return GB18030;
+case 65000:
+	return UTF7;
+case 65001:
+	return UTF8;
+default:
+	return unknown;
+}
