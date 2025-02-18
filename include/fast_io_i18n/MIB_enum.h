@@ -3996,7 +3996,7 @@ template <::std::integral char_type = char>
 inline constexpr MIB_enum literal_to_MIB(char_type const *begin, char_type const *end) noexcept
 {
 	// ::fast_io::freestanding::array does not provide template deduction guide, so we have to use ::std::array
-	::std::array names{
+	::fast_io::containers::array<::fast_io::io_scatter_t, 258> names{
 		::fast_io::io_scatter_t{u8"ASCII", 5},
 		::fast_io::io_scatter_t{u8"AdobeStandardEncoding", 21},
 		::fast_io::io_scatter_t{u8"Amiga1251", 9},
@@ -4256,7 +4256,7 @@ inline constexpr MIB_enum literal_to_MIB(char_type const *begin, char_type const
 		::fast_io::io_scatter_t{u8"windows1258", 11},
 		::fast_io::io_scatter_t{u8"windows874", 10},
 	};
-	::std::array mib_nums{
+	::fast_io::containers::array<MIB_enum, 258> mib_nums{
 		MIB_enum::ASCII,
 		MIB_enum::AdobeStandardEncoding,
 		MIB_enum::Amiga1251,
@@ -4531,7 +4531,7 @@ template <::std::integral char_type = char>
 	requires (sizeof(char_type) == 1)
 inline constexpr MIB_enum alias_name_to_MIB(char_type const *begin, char_type const *end) noexcept
 {
-	::std::array names{
+	::fast_io::containers::array<::fast_io::io_scatter_t, 804> names{
 		::fast_io::io_scatter_t{u8"437", 3},
 		::fast_io::io_scatter_t{u8"850", 3},
 		::fast_io::io_scatter_t{u8"851", 3},
@@ -5337,7 +5337,7 @@ inline constexpr MIB_enum alias_name_to_MIB(char_type const *begin, char_type co
 		::fast_io::io_scatter_t{u8"x0212", 5},
 		::fast_io::io_scatter_t{u8"yu", 2},
 	};
-	::std::array mib_nums{
+	::fast_io::containers::array<MIB_enum, 804> mib_nums{
 		MIB_enum::PC8CodePage437,
 		MIB_enum::PC850Multilingual,
 		MIB_enum::IBM851,

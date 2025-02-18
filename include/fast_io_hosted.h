@@ -61,6 +61,7 @@ freestanding ones.
 
 #if !defined(__AVR__)
 #include "fast_io_dsal/impl/common.h"
+#include "fast_io_dsal/impl/array.h"
 #include "fast_io_dsal/impl/vector.h"
 #include "fast_io_dsal/impl/string_view.h"
 #include "fast_io_dsal/impl/cstring_view.h"

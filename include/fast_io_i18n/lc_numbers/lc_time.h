@@ -279,7 +279,7 @@ template <::std::integral char_type>
 inline constexpr char_type *copy_scatter_to_lowercase(::fast_io::basic_io_scatter_t<char_type> const &scatter,
 													  char_type *iter) noexcept
 {
-	return ::fast_io::non_overlapped_copy_to_lowercase(scatter.base, scatter.base + scatter.len, iter);
+	return non_overlapped_copy_to_lowercase(scatter.base, scatter.base + scatter.len, iter);
 }
 
 template <::std::integral char_type>
