@@ -45,10 +45,15 @@ inline void *get_stack_pointer() noexcept
 #elif defined(__mips__)
 	__asm__ volatile("move %0, $sp" : "=r"(result));
 #elif defined(__powerpc__)
-	__asm__ volatile("mr %0, 1" : "=r"(result));
+	__asm__ volatile("mr %0, r1" : "=r"(result));
+#elif defined(__s390x__)
+	__asm__ volatile("stg %%r15, %0" : "=m"(result));
+#elif defined(__sparc__)
+	__asm__ volatile("mov %%sp, %0" : "=r"(result));
 #else
-	::fast_io::fast_terminate();
+#error "Unsupported architecture for stack pointer retrieval"
 #endif
+
 	return result;
 }
 
