@@ -129,7 +129,7 @@ public:
 
 	constexpr nt_thread &operator=(nt_thread const &) noexcept = delete;
 
-	constexpr nt_thread &operator=(nt_thread &&other) noexcept
+	constexpr nt_thread &operator=(nt_thread &&other) & noexcept
 	{
 		if (this == __builtin_addressof(other)) [[unlikely]]
 		{
