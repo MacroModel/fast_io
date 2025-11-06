@@ -39,4 +39,6 @@ using ::fast_io::win32::nt::this_thread::sleep_until;
 #endif
 #elif defined (__linux__)
 
+#include "linux.h"
+
 #endif

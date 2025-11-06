@@ -1,0 +1,134 @@
+#pragma once
+
+#include <atomic>
+#if !defined(__linux__)
+#error "This file is for linux only"
+#endif
+
+#include <cstddef>
+#include <utility>
+#include <ranges>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/syscall.h>
+#include <linux/futex.h>
+#include <linux/sched.h>
+#include "../../../fast_io_core_impl/allocation/c_malloc.h"
+
+namespace fast_io
+{
+
+class linux_clone3_thread
+{
+    using id = ::pid_t;
+private:
+
+    struct alignas(16) clone3_thrad_stack
+    {
+        ::std::byte tail_[1024 * 1024 - 8];
+        bool joinable_;
+    };
+
+	id id_{};
+    ::std::atomic<bool> joinable_{false};
+    void* stack_tail_{nullptr};
+
+public:
+	constexpr linux_clone3_thread() noexcept = default;
+
+    template<typename Func, typename... Args>
+        requires std::invocable<Func, Args...>
+    constexpr linux_clone3_thread(Func &&func, Args &&...args) {
+        constexpr ::std::size_t stack_size {1024 * 1024};
+        // FIXME: the return address in glibc malloc is 16bit aligned, how about others?
+        this->stack_tail_ = ::fast_io::generic_allocator_adapter<::fast_io::c_malloc_allocator>::allocate(stack_size);
+        auto stack_head_ = (reinterpret_cast<::std::size_t>(stack_tail_) + stack_size) - sizeof(void*);
+
+        // TODO support tls
+        clone_args clone3_arg {
+            .flags=CLONE_VM | CLONE_FS | CLONE_FILES | CLONE_SIGHAND | CLONE_THREAD,
+            .pidfd=0,
+            .child_tid=0,
+            .parent_tid=0,
+            .exit_signal=0,
+            .stack=reinterpret_cast<::std::size_t>(stack_tail_),
+            .stack_size=stack_head_ - reinterpret_cast<::std::size_t>(this->stack_tail_),
+            .tls=0,
+            .set_tid=0,
+            .set_tid_size=0,
+            .cgroup=0,
+        };
+
+        auto clone3_result = ::fast_io::inline_syscall<SYS_clone3, ::pid_t>(__builtin_addressof(clone3_arg), sizeof(clone_args));
+        if (clone3_result < 0) {
+            ::fast_io::throw_posix_error();
+        } else if (clone3_result == 0) {
+            func(::std::forward<Args>(args)...);
+            this->joinable_.store(false, ::std::memory_order_release);
+            this->joinable_.notify_all();
+            ::fast_io::fast_exit(0);
+        } else {
+            this->id_ = clone3_result;
+            this->joinable_.store(true, ::std::memory_order_release);
+        }
+    }
+
+	constexpr linux_clone3_thread(linux_clone3_thread &&other) noexcept
+    : id_{other.id_},
+      joinable_{other.joinable_.load(::std::memory_order_acquire)},
+      stack_tail_{other.stack_tail_}
+    {
+        other.id_ = 0;
+        other.joinable_.store(false, ::std::memory_order_release);
+        other.stack_tail_ = nullptr;
+    }
+
+	constexpr linux_clone3_thread(linux_clone3_thread const &) noexcept = delete;
+
+    constexpr ~linux_clone3_thread()
+	{
+        if (this->joinable()) [[unlikely]] {
+            ::fast_io::fast_terminate();
+        }
+        ::fast_io::generic_allocator_adapter<::fast_io::c_malloc_allocator>::deallocate(this->stack_tail_);
+	}
+
+	constexpr linux_clone3_thread &operator=(linux_clone3_thread const &) noexcept = delete;
+
+	constexpr linux_clone3_thread &operator=(linux_clone3_thread &&other) & noexcept
+	{
+        this->swap(other);
+        return *this;
+	}
+
+    constexpr void swap(linux_clone3_thread &other) noexcept {
+        ::std::ranges::swap(this->id_, other.id_);
+        bool tmp{this->joinable_.load(::std::memory_order_acquire)};
+        this->joinable_.store(other.joinable_.load(::std::memory_order_acquire), ::std::memory_order_release);
+        other.joinable_.store(tmp, ::std::memory_order_release);
+        ::std::ranges::swap(this->stack_tail_, other.stack_tail_);
+    }
+
+    constexpr bool joinable() const noexcept {
+        return this->joinable_.load(::std::memory_order_acquire);
+    }
+
+    constexpr void join()
+	{
+		if (!this->joinable()) [[unlikely]]
+		{
+			::fast_io::throw_posix_error();
+		}
+        this->id_ = 0;
+		this->joinable_.wait(true);
+	}
+
+    constexpr void detach() noexcept {
+        // relinquish responsibility for freeing the stack (leak)
+        this->joinable_.store(false, ::std::memory_order_release);
+        // do NOT deallocate stack_tail_ here (can't safely)
+        this->id_ = 0;
+    }
+};
+
+} // namespace fast_io

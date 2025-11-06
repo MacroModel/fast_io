@@ -117,7 +117,7 @@ public:
 
 	constexpr win32_thread &operator=(win32_thread const &) noexcept = delete;
 
-	constexpr win32_thread &operator=(win32_thread &&other) noexcept
+	constexpr win32_thread &operator=(win32_thread &&other) & noexcept
 	{
 		if (this == __builtin_addressof(other)) [[unlikely]]
 		{
