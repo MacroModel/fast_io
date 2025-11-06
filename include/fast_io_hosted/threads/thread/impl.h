@@ -37,7 +37,7 @@ using ::fast_io::win32::nt::this_thread::sleep_until;
 
 } // namespace fast_io
 #endif
-#elif defined (__linux__)
+#elif defined(__linux__)
 
 #include "linux.h"
 

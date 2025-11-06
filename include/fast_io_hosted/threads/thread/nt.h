@@ -248,8 +248,8 @@ template <bool zw = false, typename Clock, typename Duration>
 constexpr void sleep_until(::std::chrono::time_point<Clock, Duration> const &expect_time)
 {
 	auto const unix_ts = ::std::chrono::duration_cast<std::chrono::seconds>(
-					   expect_time.time_since_epoch())
-					   .count();
+							 expect_time.time_since_epoch())
+							 .count();
 	auto nt_ts = (unix_ts + 11644473600) * 10000000;
 	::std::uint_least32_t status{::fast_io::win32::nt::nt_delay_execution<zw>(false, __builtin_addressof(nt_ts))};
 	if (status) [[unlikely]]

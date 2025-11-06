@@ -1,6 +1,6 @@
 #pragma once
 
-#if defined (_MSC_VER) && !defined(__clang__)
+#if defined(_MSC_VER) && !defined(__clang__)
 #error "get_stack_pointer is not supported on MSVC"
 #endif
 
@@ -47,9 +47,9 @@ inline void *get_stack_pointer() noexcept
 #elif defined(__powerpc__)
 	__asm__ volatile("mr %0, 1" : "=r"(result));
 #else
-    ::fast_io::fast_terminate();
+	::fast_io::fast_terminate();
 #endif
 	return result;
 }
 
-} // namespace fast_io
+} // namespace fast_io::details
